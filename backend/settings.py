@@ -1,7 +1,7 @@
 TORTOISE_ORM = {
     'connections': {
         'default': {
-            'engine': 'tortoise.backends.postgresql_psycopg2',
+            'engine': 'tortoise.backends.asyncpg',
             'credentials': {
                 'host': '113.44.76.249',
                 'port': 5432,
@@ -10,13 +10,12 @@ TORTOISE_ORM = {
                 'database': 'PGuard',
                 'minsize': 1,
                 'maxsize': 3,
-                'echo': True,
             }
         }
     },
     'apps': {
         'models': {
-            'models': ['models', 'aerich.models'],
+            'models': ['Models.models', 'aerich.models'],
             'default_connection': 'default',
         }
     },

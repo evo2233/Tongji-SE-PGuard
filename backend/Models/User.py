@@ -1,9 +1,17 @@
-from tortoise.models import Model
-from tortoise import fields
+from pydantic import BaseModel, validator
+from Models.models import User
 
-class User(Model):
-    userId = fields.UUIDField(pk=True)
-    userName = fields.TextField(unique=True)
-    password = fields.TextField()
-    location = fields.TextField()
-    sumCount = fields.SmallIntField()
+class SignUpForm(BaseModel):
+    userName: str
+    password: str
+    location: str
+
+    @classmethod
+    async def name_must_be_unique(cls, username: str):
+        if await User.filter(userName=username).exists():
+            raise ValueError('用户名已存在')
+        return username
+
+class SignInForm(BaseModel):
+    userName: str
+    password: str
