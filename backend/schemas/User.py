@@ -1,5 +1,5 @@
-from pydantic import BaseModel, validator
-from Models.models import User
+from pydantic import BaseModel
+from models.models import User
 
 class SignUpForm(BaseModel):
     userName: str

@@ -5,7 +5,7 @@ import uuid
 class User(Model):
     userId = fields.UUIDField(pk=True, default=uuid.uuid4)
     userName = fields.CharField(max_length=40, unique=True)
-    password = fields.CharField(max_length=40)
+    password = fields.CharField(max_length=100)
     location = fields.CharField(max_length=40)
     sumCount = fields.SmallIntField()
 
