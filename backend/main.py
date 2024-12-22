@@ -3,7 +3,6 @@ from fastapi import FastAPI
 from tortoise.contrib.fastapi import register_tortoise
 
 from database.settings import TORTOISE_ORM
-from routers.auth import auth_api
 from routers.user import user_api
 
 app_api = FastAPI(
@@ -12,7 +11,6 @@ app_api = FastAPI(
     version="1.0.0"
 )
 
-app_api.include_router(auth_api, prefix="/user", tags=["UserService"])
 app_api.include_router(user_api, prefix="/user", tags=["UserService"])
 
 register_tortoise(
