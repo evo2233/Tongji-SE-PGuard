@@ -3,6 +3,7 @@ import os
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
 from passlib.context import CryptContext
+from database.redis_config import RedisConfig
 
 # 仅用于开发环境加载.env
 load_dotenv()
@@ -42,3 +43,26 @@ def create_refresh_token(data: dict):
 
 def decode_token(token: str):
     return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+
+
+def invalidate_token(token: str):
+    """将token加入黑名单"""
+    try:
+        # 解析token获取过期时间
+        payload = decode_token(token)
+        exp = datetime.fromtimestamp(payload['exp'])
+        # 计算剩余有效期
+        ttl = (exp - datetime.utcnow()).total_seconds()
+        if ttl > 0:
+            # 使用RedisConfig获取redis客户端
+            redis_client = RedisConfig.get_client()
+            # 将token加入黑名单，并设置过期时间
+            redis_client.setex(f"blacklist:{token}", int(ttl), "1")
+    except Exception:
+        pass
+
+
+def is_token_blacklisted(token: str) -> bool:
+    """检查token是否在黑名单中"""
+    redis_client = RedisConfig.get_client()
+    return bool(redis_client.get(f"blacklist:{token}"))

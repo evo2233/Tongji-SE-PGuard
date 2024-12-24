@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException
-from dependencies.auth import get_current_user
-from models.models import User
+import uuid
+from fastapi import APIRouter, Depends, HTTPException, Body
+from dependencies.auth import get_current_user, oauth2_scheme
+from models.models import User, Package
 from schemas.User import SignUpForm, SignInForm
 import core.security as core
 from datetime import timedelta
@@ -61,7 +62,7 @@ async def get_token(form: SignInForm):
 
 
 @user_api.post("/refresh")
-async def refresh_token(refresh_token: str):
+async def refresh_token(current_token: str = Depends(oauth2_scheme), refresh_token: str = Body(...)):
     try:
         # 验证refresh token
         payload = core.decode_token(refresh_token)
@@ -69,22 +70,28 @@ async def refresh_token(refresh_token: str):
         if user_id is None:
             raise HTTPException(status_code=401, detail="无效的refresh token")
 
-        # 生成新的access token
-        access_token_expires = timedelta(minutes=30)
-        access_token = core.create_access_token(
-            data={"sub": user_id}, expires_delta=access_token_expires
-        )
+        # 验证access token(登录状态)
+        if not core.is_token_blacklisted(current_token):
+            # 将当前的access token加入黑名单
+            core.invalidate_token(current_token)
 
-        return {
-            "access_token": access_token,
-            "token_type": "bearer"
-        }
+            # 生成新的access token
+            access_token_expires = timedelta(minutes=30)
+            access_token = core.create_access_token(
+                data={"sub": user_id}, expires_delta=access_token_expires)
+
+            return {
+                "access_token": access_token,
+                "token_type": "bearer"
+            }
+        else:
+            raise HTTPException(status_code=401, detail="无效的access token")
     except JWTError:
         raise HTTPException(status_code=401, detail="无效的refresh token")
 
 
 @user_api.get("/me")
-async def get_crnt_user(current_user: User = Depends(get_current_user)):
+async def get_user(current_user: User = Depends(get_current_user)):
     return {
         "userId": str(current_user.userId),
         "userName": current_user.userName,
@@ -107,6 +114,21 @@ async def update_user(form: SignUpForm, user: User = Depends(get_current_user)):
     }
 
 
-"""如何logout：在前端删除access_token和refresh_token"""
+@user_api.post("/logout")
+async def logout(current_token: str = Depends(oauth2_scheme)):
+    if not core.is_token_blacklisted(current_token):
+        core.invalidate_token(current_token)
+        return {"登出成功"}
+    else:
+        raise HTTPException(status_code=401, detail="无效的access token")
 
 
+@user_api.post("/recharge/{package_id}")
+async def purchase(package_id: str, user: User = Depends(get_current_user)):
+    try:
+        package = await Package.get(packageId=uuid.UUID(package_id))
+        user.sumCount += package.sumNum
+        await user.save()
+        return {"packageId": package_id, "sumCount": user.sumCount}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

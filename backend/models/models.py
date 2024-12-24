@@ -12,21 +12,21 @@ class User(Model):
 
 
 class Package(Model):
-    packageId = fields.UUIDField(pk=True)
+    packageId = fields.UUIDField(pk=True, default=uuid.uuid4)
     packageName = fields.CharField(max_length=40)
     price = fields.FloatField()
     sumNum = fields.SmallIntField()
 
 
 class Plant(Model):
-    plantId = fields.UUIDField(pk=True)
+    plantId = fields.UUIDField(pk=True, default=uuid.uuid4)
     plantName = fields.CharField(max_length=40)
     plantFeature = fields.TextField()
     plantIconURL = fields.CharField(max_length=100)
 
 
 class Plot(Model):
-    plotId = fields.UUIDField(pk=True)
+    plotId = fields.UUIDField(pk=True, default=uuid.uuid4)
     plotName = fields.CharField(max_length=40)
     userId = fields.ForeignKeyField('models.User', related_name='plot')
     plantId = fields.ForeignKeyField('models.Plant', related_name='plot')

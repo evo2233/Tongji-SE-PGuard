@@ -1,6 +1,6 @@
 from fastapi import Depends, HTTPException, status
 from jose import jwt, JWTError
-from core.security import SECRET_KEY, ALGORITHM
+from core.security import SECRET_KEY, ALGORITHM, is_token_blacklisted
 from models.models import User
 from fastapi.security import OAuth2PasswordBearer
 
@@ -13,6 +13,10 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
+        # 先检查token是否在黑名单中
+        if is_token_blacklisted(token):
+            raise credentials_exception
+        
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: str = payload.get("sub")
         if user_id is None:
