@@ -132,3 +132,12 @@ async def purchase(package_id: str, user: User = Depends(get_current_user)):
         return {"packageId": package_id, "sumCount": user.sumCount}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@user_api.get("/recharge")
+async def get_all_packages(user: User = Depends(get_current_user)):
+    try:
+        packages = await Package.all()
+        return packages
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
