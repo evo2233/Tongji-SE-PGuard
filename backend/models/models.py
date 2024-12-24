@@ -18,21 +18,16 @@ class Package(Model):
     sumNum = fields.SmallIntField()
 
 
-class Icon(Model):
-    iconURL = fields.CharField(pk=True, max_length=100)
-    iconName = fields.CharField(max_length=40)
-
-
 class Plant(Model):
     plantId = fields.UUIDField(pk=True)
     plantName = fields.CharField(max_length=40)
     plantFeature = fields.TextField()
+    plantIconURL = fields.CharField(max_length=100)
 
 
 class Plot(Model):
     plotId = fields.UUIDField(pk=True)
     plotName = fields.CharField(max_length=40)
-    iconURL = fields.ForeignKeyField('models.Icon', related_name='plot')
     userId = fields.ForeignKeyField('models.User', related_name='plot')
     plantId = fields.ForeignKeyField('models.Plant', related_name='plot')
 
