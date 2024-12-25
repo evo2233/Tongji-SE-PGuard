@@ -1,26 +1,27 @@
 import uvicorn
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI
 from tortoise.contrib.fastapi import register_tortoise
+from database.settings import TORTOISE_ORM
+from routers.admin import admin
+from routers.user import user_api
 
-from settings import TORTOISE_ORM
-from Service.UserService import user_api
-
-app_api = FastAPI(
+app = FastAPI(
     title="PGuard API",
     description="PGuard 系统的 API 文档",
     version="1.0.0"
 )
 
-app_api.include_router(user_api, prefix="/user", tags=["UserService"])
+app.include_router(admin, prefix="/admin", tags=["AdminService"])
+app.include_router(user_api, prefix="/user", tags=["UserService"])
 
 register_tortoise(
-    app=app_api,
+    app=app,
     config=TORTOISE_ORM,
 )
 
 if __name__ == '__main__':
     uvicorn.run(
-        "main:app_api",
+        "main:app",
         host="0.0.0.0",
         port=8000,
         reload=True
