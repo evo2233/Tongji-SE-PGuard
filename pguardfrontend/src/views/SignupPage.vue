@@ -61,8 +61,8 @@
   }
 
   try {
-    // 发送POST请求backendUrl+
-    const response = await axios.post('http://113.44.76.249:8000/user/signup', {
+    // 发送POST请求
+    const response = await axios.post(backendUrl+'/user/signup', {
       userName: username.value,
       password: password.value,
       location: location.value
