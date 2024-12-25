@@ -17,6 +17,9 @@
                 <ion-input v-model="username" type="text" label="用户名" ></ion-input>
               </ion-item>
               <ion-item>
+                <ion-input v-model="location" type="text" label="所在地" ></ion-input>
+              </ion-item>
+              <ion-item>
                 <ion-input v-model="password" type="password" label="密码">
                   <ion-input-password-toggle slot="end"></ion-input-password-toggle>
                 </ion-input>
@@ -42,13 +45,14 @@
   import { backendUrl } from '@/config';
   import axios from 'axios';
   const username = ref('');
+  const location = ref('');
   const password = ref('');
   const confirmpassword = ref('');
   const ionRouter = useIonRouter();
   import { presentAlert ,errorAlert} from '@/alert';
   const signup = async () => {
-  if (!username.value || !password.value||!confirmpassword.value) {
-    presentAlert('请输入用户名和密码',"","");
+  if (!username.value || !password.value||!confirmpassword.value||!location.value) {
+    presentAlert('请输入用户名、所在地和密码',"","");
     return;
   }
   if (password.value!=confirmpassword.value) {
@@ -57,10 +61,11 @@
   }
 
   try {
-    // 发送POST请求
-    const response = await axios.post(backendUrl+'/signup', {
-      username: username.value,
-      password: password.value
+    // 发送POST请求backendUrl+
+    const response = await axios.post('http://113.44.76.249:8000/user/signup', {
+      userName: username.value,
+      password: password.value,
+      location: location.value
     });
 
     if (response.status === 200) {
