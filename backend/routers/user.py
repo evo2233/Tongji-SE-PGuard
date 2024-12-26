@@ -2,7 +2,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Body
 from dependencies.auth import get_current_user, oauth2_scheme
 from models.models import User, Package
-from schemas.User import SignUpForm, SignInForm
+from schemas.form import SignUpForm, SignInForm
 import core.security as core
 from datetime import timedelta
 from jose import JWTError

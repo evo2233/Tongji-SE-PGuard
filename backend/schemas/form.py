@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from models.models import User
+from models.models import User, Log
 
 
 class SignUpForm(BaseModel):
@@ -17,3 +17,12 @@ class SignUpForm(BaseModel):
 class SignInForm(BaseModel):
     userName: str
     password: str
+
+
+class PlotForm(BaseModel):
+    plotId: str
+    plotName: str
+    plantId: str
+    plantName: str
+    plantFeature: str
+    logs: Log

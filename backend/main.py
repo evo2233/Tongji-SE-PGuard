@@ -4,6 +4,7 @@ from tortoise.contrib.fastapi import register_tortoise
 from database.settings import TORTOISE_ORM
 from routers.admin import admin
 from routers.user import user_api
+from routers.plot import plot_api
 
 app = FastAPI(
     title="PGuard API",
@@ -13,6 +14,7 @@ app = FastAPI(
 
 app.include_router(admin, prefix="/admin", tags=["AdminService"])
 app.include_router(user_api, prefix="/user", tags=["UserService"])
+app.include_router(plot_api, prefix="/plot", tags=["PlotService"])
 
 register_tortoise(
     app=app,
