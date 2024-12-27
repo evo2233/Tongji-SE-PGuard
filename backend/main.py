@@ -1,17 +1,22 @@
 import uvicorn
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from tortoise.contrib.fastapi import register_tortoise
 from database.settings import TORTOISE_ORM
 from routers.admin import admin
 from routers.user import user_api
 from routers.plot import plot_api
 from fastapi.middleware.cors import CORSMiddleware
+from core.config import RESOURCE_PATH
 
 app = FastAPI(
     title="PGuard API",
     description="PGuard 系统的 API 文档",
     version="1.0.0"
 )
+
+# 挂载静态文件目录
+app.mount("/resource", StaticFiles(directory=RESOURCE_PATH), name="resource")
 
 app.include_router(admin, prefix="/admin", tags=["AdminService"])
 app.include_router(user_api, prefix="/user", tags=["UserService"])

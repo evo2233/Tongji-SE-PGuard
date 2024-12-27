@@ -6,6 +6,7 @@ from schemas.form import SignUpForm, SignInForm
 import core.security as core
 from datetime import timedelta
 from jose import JWTError
+from typing import List
 
 user_api = APIRouter()
 
@@ -103,7 +104,7 @@ async def get_user(current_user: User = Depends(get_current_user)):
 @user_api.patch("/update")
 async def update_user(form: SignUpForm, user: User = Depends(get_current_user)):
     user.userName = form.userName
-    user.password = core.get_password_hash(form.password),
+    user.password = core.get_password_hash(form.password)
     user.location = form.location
     await user.save()
     return {
@@ -123,6 +124,23 @@ async def logout(current_token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=401, detail="无效的access token")
 
 
+@user_api.get('/package', response_model=List[dict])
+async def get_all_packages():
+    try:
+        packages = await Package.all()
+        return [
+            {
+                "packageId": str(package.packageId),
+                "packageName": package.packageName,
+                "price": package.price,
+                "sumNum": package.sumNum
+            }
+            for package in packages
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取套餐列表失败: {str(e)}")
+
+
 @user_api.post("/recharge/{package_id}")
 async def purchase(package_id: str, user: User = Depends(get_current_user)):
     try:
@@ -130,14 +148,5 @@ async def purchase(package_id: str, user: User = Depends(get_current_user)):
         user.sumCount += package.sumNum
         await user.save()
         return {"packageId": package_id, "sumCount": user.sumCount}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@user_api.get("/recharge")
-async def get_all_packages(user: User = Depends(get_current_user)):
-    try:
-        packages = await Package.all()
-        return packages
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

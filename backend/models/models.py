@@ -20,7 +20,7 @@ class Package(Model):
 
 class Plant(Model):
     plantId = fields.UUIDField(pk=True, default=uuid.uuid4)
-    plantName = fields.CharField(max_length=40)
+    plantName = fields.CharField(max_length=40, unique=True)
     plantFeature = fields.TextField()
     plantIconURL = fields.CharField(max_length=100)
 
