@@ -1,7 +1,8 @@
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, Body
+from core.config import validate_location
 from dependencies.auth import get_current_user, oauth2_scheme
-from models.models import User, Package
+from models.models import User, Package, City
 from schemas.form import SignUpForm, SignInForm
 import core.security as core
 from datetime import timedelta
@@ -11,11 +12,30 @@ from typing import List
 user_api = APIRouter()
 
 
+@user_api.get('/city/{keyword}')
+async def search_city(keyword: str):
+    """根据关键字搜索城市"""
+    try:
+        cities = await City.filter(cityName__contains=keyword).all()
+        if not cities:
+            return {"message": "未找到匹配的城市"}
+        return [
+            {
+                "cityName": city.cityName,
+                "cityCode": city.cityCode
+            }
+            for city in cities
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"搜索城市失败: {str(e)}")
+
+
 @user_api.post("/signup")
 async def create_user(form: SignUpForm):
     try:
         # 先进行表单验证
         await form.name_must_be_unique(form.userName)
+        await validate_location(form.location)
 
         # 创建新用户
         user = await User.create(
@@ -103,16 +123,22 @@ async def get_user(current_user: User = Depends(get_current_user)):
 
 @user_api.patch("/update")
 async def update_user(form: SignUpForm, user: User = Depends(get_current_user)):
-    user.userName = form.userName
-    user.password = core.get_password_hash(form.password)
-    user.location = form.location
-    await user.save()
-    return {
-        "userId": str(user.userId),
-        "userName": user.userName,
-        "password": form.password,  # 加密算法不可解密
-        "location": user.location,
-    }
+    try:
+        await validate_location(form.location)
+        
+        user.userName = form.userName
+        user.password = core.get_password_hash(form.password)
+        user.location = form.location
+        await user.save()
+        return {
+            "userId": str(user.userId),
+            "userName": user.userName,
+            "location": user.location,
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @user_api.post("/logout")

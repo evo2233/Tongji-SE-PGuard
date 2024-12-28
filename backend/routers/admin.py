@@ -3,8 +3,9 @@
 """
 import uuid
 from fastapi import APIRouter, Body, HTTPException
-from models.models import Package, Plant, Plot
+from models.models import Package, Plant, City
 from typing import List
+from core.config import validate_city_file
 
 admin = APIRouter()
 
@@ -46,7 +47,7 @@ async def delete_package(packageId: str):
         package = await Package.get(packageId=uuid.UUID(packageId))
         if not package:
             raise HTTPException(status_code=404, detail="套餐不存在")
-        
+
         await package.delete()
         return {"message": "套餐删除成功"}
     except ValueError:
@@ -93,7 +94,7 @@ async def delete_plant(plantId: str):
         plant = await Plant.get(plantId=uuid.UUID(plantId))
         if not plant:
             raise HTTPException(status_code=404, detail="植物不存在")
-            
+
         await plant.delete()
         return {"message": "植物删除成功"}
     except ValueError:
@@ -117,3 +118,55 @@ async def get_all_plants():
         ]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"获取植物列表失败: {str(e)}")
+
+
+@admin.post('/weather')
+async def city_input(csvURL: str = Body(...)):
+    """导入城市数据到数据库"""
+    file = None
+    try:
+        # 验证并获取CSV reader
+        csv_reader, file = validate_city_file(csvURL)
+
+        # 清空现有数据
+        await City.all().delete()
+
+        # 批量创建城市记录
+        cities = []
+        row_count = 0
+        for row in csv_reader:
+            row_count += 1
+            if len(row) >= 2:
+                city_name = row[0].strip()
+                city_code = row[1].strip()
+
+                if not city_code or not city_name:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"第{row_count}行数据错误：城市名或代码不能为空"
+                    )
+
+                cities.append(
+                    City(
+                        cityCode=city_code,
+                        cityName=city_name
+                    )
+                )
+        if not cities:
+            raise HTTPException(status_code=400, detail="CSV文件中没有数据")
+
+        # 批量保存到数据库
+        await City.bulk_create(cities)
+
+        return {
+            "message": f"成功导入 {len(cities)} 个城市数据",
+            "url": f"/resource/{csvURL}"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"导入城市数据失败: {str(e)}")
+    finally:
+        if file:
+            file.close()

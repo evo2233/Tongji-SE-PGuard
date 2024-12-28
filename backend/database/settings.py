@@ -1,7 +1,14 @@
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
 
 load_dotenv()
+
+# 获取项目根目录
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+
+# 将项目根目录添加到 Python 路径
+import sys
+sys.path.append(BASE_DIR)
 
 TORTOISE_ORM = {
     'connections': {

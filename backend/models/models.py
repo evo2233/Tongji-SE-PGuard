@@ -49,3 +49,8 @@ class Disease(Model):
 class Advice(Model):
     diseaseId = fields.ForeignKeyField('models.Disease', pk=True, related_name='advice', on_delete=fields.CASCADE)
     content = fields.TextField()
+
+
+class City(Model):
+    cityCode = fields.CharField(pk=True, max_length=10)
+    cityName = fields.CharField(max_length=40, unique=True)

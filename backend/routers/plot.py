@@ -1,14 +1,11 @@
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, Body
-from fastapi.responses import FileResponse
 from tortoise.exceptions import DoesNotExist
 from models.models import User, Plot, Plant, Log
 from dependencies.auth import get_current_user
 from core.config import validate_image_file
 from typing import List
 from schemas.form import PlotDetails, LogDetail
-from datetime import datetime
-from tortoise.query_utils import Prefetch
 from tortoise.queryset import Prefetch
 
 plot_api = APIRouter()
