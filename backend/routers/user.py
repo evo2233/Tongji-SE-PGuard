@@ -30,10 +30,10 @@ async def search_city(keyword: str):
         raise HTTPException(status_code=500, detail=f"搜索城市失败: {str(e)}")
 
 
-@user_api.get('/city/{cityName}')
-async def get_city_code(cityName: str):
+@user_api.get('/city')
+async def get_user_city_code(user: User = Depends(get_current_user)):
     try:
-        city = await City.get(cityName=cityName)
+        city = await City.get(cityName=user.location)
         if not city:
             return {"message": "未找到匹配的城市"}
         return {
