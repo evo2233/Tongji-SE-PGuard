@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
+import storage from "@/utils/storage";
 import TabsPage from '../views/TabsPage.vue'
 
 const routes: Array<RouteRecordRaw> = [
@@ -10,8 +11,8 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/tabs/',
     component: TabsPage,
-    beforeEnter: (to, from, next) => {
-      const isLoggedIn = checkLoginStatus(); 
+    beforeEnter: async (to, from, next) => {  
+      const isLoggedIn = await checkLoginStatus(); 
       if (!isLoggedIn) {
         next('/login'); 
       } else {
@@ -32,7 +33,7 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/InfoPage.vue')
       },
       {
-        path: '/strip/:id',
+        path: 'strip/:id',
         component: () => import('@/views/StripPage.vue'),
       }
     ]
@@ -47,7 +48,10 @@ const routes: Array<RouteRecordRaw> = [
   }
 ]
 function checkLoginStatus() {
-  return sessionStorage.getItem('isLoggedIn') === 'true';
+  return storage.get('access_token').then(token => {
+    console.log(token); 
+    return !!token; 
+  });
 }
 
 const router = createRouter({

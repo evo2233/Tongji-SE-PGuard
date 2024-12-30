@@ -29,13 +29,19 @@
   <script setup lang="ts">
   import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent,IonInput,IonItem,IonInputPasswordToggle, IonButton,IonGrid,IonCol,IonRow,useIonRouter } from '@ionic/vue';
   import { ref } from 'vue';
-  import { presentAlert, errorAlert } from '@/alert';
-  import { backendUrl } from '@/config';
+  import { presentAlert, errorAlert } from '@/utils/alert';
+  import { backendUrl } from '@/utils/config';
+  import storage from "@/utils/storage";
   import axios from 'axios';
+  import startTokenRefreshTask from '@/utils/refresh';;
+  import { refreshGap } from '@/utils/refresh';
   const username = ref('');
   const password = ref('');
   const ionRouter = useIonRouter();
-  
+  interface LoginResponse {
+    access_token: string;
+    refresh_token: string;
+  }
   const login = async () => {
   if (!username.value || !password.value) {
     presentAlert("请输入用户名和密码","","");
@@ -44,16 +50,24 @@
 
   try {
     // 发送POST请求
-    const response = await axios.post(backendUrl+'/login', {
-      username: username.value,
+    const response = await axios.post<LoginResponse>(backendUrl+'/user/signin', {
+      userName: username.value,
       password: password.value
     });
 
     // 检查返回的状态
     if (response.status === 200) {
-      sessionStorage.setItem('isLoggedIn', 'true');
-
-      ionRouter.push('/tabs/home');
+      const { access_token, refresh_token } = response.data;
+      const now = new Date(); 
+      const thirtyMinutesLater = new Date(now.getTime() + refreshGap); 
+      const timestamp = thirtyMinutesLater.getTime(); 
+      await Promise.all([
+        storage.set('access_token', access_token),
+        storage.set('refresh_token', refresh_token),
+        storage.set('refresh_time', timestamp),
+      ]);
+      startTokenRefreshTask();
+      ionRouter.push('/tabs/info');
     } else {
       presentAlert("登录失败，请检查用户名和密码","","");
     }
