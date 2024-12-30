@@ -30,6 +30,20 @@ async def search_city(keyword: str):
         raise HTTPException(status_code=500, detail=f"搜索城市失败: {str(e)}")
 
 
+@user_api.get('/city/{cityName}')
+async def get_city_code(cityName: str):
+    try:
+        city = await City.get(cityName=cityName)
+        if not city:
+            return {"message": "未找到匹配的城市"}
+        return {
+            "cityName": city.cityName,
+            "cityCode": city.cityCode
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取城市码失败: {str(e)}")
+
+
 @user_api.post("/signup")
 async def create_user(form: SignUpForm):
     try:
