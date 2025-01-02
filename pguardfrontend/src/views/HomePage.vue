@@ -6,6 +6,19 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
+      <!-- 天气信息展示区域 -->
+      <ion-card  v-if="weather" style="background: linear-gradient(to bottom, #a8d8f7, #fff)">
+        <ion-card-header>
+          <ion-card-title>{{ weather.city }} 当前天气</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p>{{ weather.casts[0].date }}</p>
+          <p>气温：{{ weather.casts[0].nighttemp }} ~ {{  weather.casts[0].daytemp }}°C</p>
+          <p>白天天气：{{ weather.casts[0].dayweather }} <ion-icon :icon="getDayWeatherIcon"  color="primary" /></p>
+          <p>晚上天气：{{ weather.casts[0].nightweather }} <ion-icon :icon="getNightWeatherIcon"  color="primary" /></p>
+        </ion-card-content>
+      </ion-card>
+
       <!-- 有数据时显示地块卡片 -->
       <ion-grid v-if="filteredCards.length > 0">
         <ion-row>
@@ -68,10 +81,12 @@
 import { useIonRouter,IonPage, IonHeader, IonToolbar, IonContent,IonCard,IonCardHeader,IonCardTitle,
   IonGrid,IonRow,IonCol,IonSearchbar,IonCardSubtitle,IonFab,IonFabButton,IonIcon,IonModal,IonTitle,IonButtons,
   IonButton,IonList,IonItem,IonLabel,IonInput,IonImg, onIonViewWillEnter,IonCardContent } from '@ionic/vue';
-import { addOutline } from 'ionicons/icons';
-import { ref, computed, onMounted,defineComponent } from 'vue';
+import { sunnyOutline, moonOutline, rainyOutline, snowOutline, partlySunnyOutline, cloudyNightOutline, cloudyOutline ,addOutline} from 'ionicons/icons';
+
+import { ref, computed, onMounted } from 'vue';
 import { backendUrl } from '@/utils/config';
 import { presentAlert, errorAlert } from '@/utils/alert';
+import { getWeather } from '@/utils/weather';
 import storage from '@/utils/storage';
 import axios from 'axios';
 
@@ -172,10 +187,50 @@ const handleSearch = (event: Event) => {
   searchQuery.value = input.value;
 };
 
+const weather = ref<any>(null); 
+const fetchWeather = async () => {
+  weather.value = await getWeather();
+};
+// 根据白天的天气条件返回图标
+const getDayWeatherIcon = computed(() => {
+  const dayWeather = weather.value?.casts[0]?.dayweather.toLowerCase();
+  if (dayWeather.includes('晴')) {
+    return sunnyOutline;
+  } else if (dayWeather.includes('云')) {
+    return partlySunnyOutline;
+  } else if (dayWeather.includes('雨')) {
+    return rainyOutline;
+  } else if (dayWeather.includes('雪')) {
+    return snowOutline;
+  } else if (dayWeather.includes('阴')) {
+    return cloudyOutline;
+  }
+  return sunnyOutline; // 默认返回晴天图标
+});
+
+// 根据晚上的天气条件返回图标
+const getNightWeatherIcon = computed(() => {
+  const nightWeather = weather.value?.casts[0]?.nightweather.toLowerCase();
+  if (nightWeather.includes('晴')) {
+    return moonOutline;
+  } else if (nightWeather.includes('云')) {
+    return cloudyNightOutline;
+  } else if (nightWeather.includes('雨')) {
+    return rainyOutline;
+  } else if (nightWeather.includes('雪')) {
+    return snowOutline;
+  } else if (nightWeather.includes('阴')) {
+    return cloudyOutline;
+  }
+  return moonOutline; // 默认返回晴天图标
+});
 onMounted(() => {
+  fetchWeather();
   fetchCards();
 });
+
 onIonViewWillEnter(() => {
+  fetchWeather();
   fetchCards();
 });
 </script>

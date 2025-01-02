@@ -67,7 +67,7 @@
         storage.set('refresh_time', timestamp),
       ]);
       startTokenRefreshTask();
-      ionRouter.push('/tabs/info');
+      ionRouter.push('/tabs/home');
     } else {
       presentAlert("登录失败，请检查用户名和密码","","");
     }
