@@ -5,13 +5,15 @@ from fastapi import HTTPException
 from models.models import City
 
 # 允许的图片类型
-ALLOWED_IMAGE_TYPES: Set[str] = {'.jpg', '.jpeg', '.png', '.gif', '.webp'}
+ALLOWED_IMAGE_TYPES: Set[str] = {'.jpg', '.jpeg', '.png'}
 # 获取项目根目录的resource文件夹路径
 RESOURCE_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resource")
-
 # 确保resource目录存在
 if not os.path.exists(RESOURCE_PATH):
     os.makedirs(RESOURCE_PATH)
+
+# yolov8模型路径
+ULTRALYTICS_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "yolov8\\ultralytics-main")
 
 # 按地块分类存放上传检测图片的文件夹
 UPLOAD_PATH: str = os.path.join(RESOURCE_PATH, "log")

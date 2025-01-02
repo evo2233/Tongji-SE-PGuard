@@ -1,22 +1,17 @@
 import subprocess
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
-ultralytics_path = os.getenv("ULTRALYTICS_PATH")
-if not ultralytics_path:
-    raise ValueError("ULTRALYTICS_PATH environment variable not set")
+from core.config import ULTRALYTICS_PATH
 
 
 def detect(model_type: str, image_path: str):
     if model_type == "Grape":
-        python_script = os.path.join(ultralytics_path, "Grape_defect.py")
+        python_script = os.path.join(ULTRALYTICS_PATH, "Grape_defect.py")
     elif model_type == "Potato":
-        python_script = os.path.join(ultralytics_path, "Potato_defect.py")
+        python_script = os.path.join(ULTRALYTICS_PATH, "Potato_defect.py")
     else:
         raise ValueError("model_type not supported")
 
-    env_path = os.path.join(ultralytics_path, "yolov8_env")
+    env_path = os.path.join(ULTRALYTICS_PATH, "yolov8_env")
 
     python_exe = os.path.join(env_path, "python")
 
@@ -24,7 +19,7 @@ def detect(model_type: str, image_path: str):
 
     process = subprocess.Popen(
         command,
-        cwd=ultralytics_path,  # 设置工作目录
+        cwd=ULTRALYTICS_PATH,  # 设置工作目录
         stdout=subprocess.PIPE,  # 捕获标准输出
         stderr=subprocess.PIPE,  # 捕获错误输出
         text=True,

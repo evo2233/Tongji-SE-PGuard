@@ -2,19 +2,20 @@
 本文件用于管理员操作的API实现
 """
 import uuid
-from fastapi import APIRouter, Body, HTTPException
-from models.models import Package, Plant, City
+from fastapi import APIRouter, HTTPException, Query
+from models.models import Package, Plant, City, Disease
 from typing import List
 from core.config import validate_city_file
+from schemas.Map import PLANT_NAME_MAP
 
 admin = APIRouter()
 
 
 @admin.post('/package/add')
 async def add_package(
-        packageName: str = Body(...),
-        price: float = Body(...),
-        sumNum: int = Body(...)
+        packageName: str = Query(...),
+        price: float = Query(...),
+        sumNum: int = Query(...)
 ):
     try:
         # 验证输入
@@ -58,9 +59,9 @@ async def delete_package(packageId: str):
 
 @admin.post('/plant/add')
 async def add_plant(
-        plantName: str = Body(...),
-        plantFeature: str = Body(...),
-        plantIconURL: str = Body(...)
+        plantName: str = Query(...),
+        plantFeature: str = Query(...),
+        plantIconURL: str = Query(...)
 ):
     try:
         # 检查植物名是否已存在
@@ -120,8 +121,8 @@ async def get_all_plants():
         raise HTTPException(status_code=500, detail=f"获取植物列表失败: {str(e)}")
 
 
-@admin.post('/weather')
-async def city_input(csvURL: str = Body(...)):
+@admin.post('/weather/city_input')
+async def city_input(csvURL: str = Query(...)):
     """导入城市数据到数据库"""
     file = None
     try:
@@ -170,3 +171,36 @@ async def city_input(csvURL: str = Body(...)):
     finally:
         if file:
             file.close()
+
+
+@admin.post('/disease/add')
+async def add_disease(
+        diseaseName: str = Query(...),
+        plantName: str = Query(...),
+        advice: str = Query(...)
+):
+    plant = await Plant.get(plantName=plantName)
+    plant_name = PLANT_NAME_MAP.get(plant.plantName)
+    if not plant_name:
+        raise HTTPException(status_code=404, detail="未收录的植物")
+
+    try:
+        existing_disease = await Disease.filter(diseaseName=diseaseName).first()
+        if existing_disease:
+            raise HTTPException(status_code=400, detail="病名已存在")
+
+        disease = await Disease.create(
+            diseaseName=diseaseName,
+            plantId=plant,
+            advice=advice
+        )
+
+        return {
+            "plantId": str(plant.plantId),
+            "diseaseName": disease.diseaseName,
+            "message": "病害添加成功"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"添加病害失败: {str(e)}")

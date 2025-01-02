@@ -1,12 +1,12 @@
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, Body
 from tortoise.exceptions import DoesNotExist
-from models.models import User, Plot, Plant, Log
+from models.models import User, Plot, Plant
 from dependencies.auth import get_current_user
 from core.config import validate_image_file
 from typing import List
-from schemas.form import PlotDetails, LogDetail
-from tortoise.queryset import Prefetch
+from routers.logController import get_logs
+from schemas.form import PlotDetails
 
 plot_api = APIRouter()
 
@@ -81,34 +81,24 @@ async def add_plot(
 
 
 @plot_api.get("/{plotId}", response_model=PlotDetails)
-async def get_plot_by_id(plotId: str, user: User = Depends(get_current_user)):
+async def get_plot_detail(plotId: str, user: User = Depends(get_current_user)):
     try:
-        # 获取地块信息，同时预加载植物信息和日志信息
+        plot_uuid = uuid.UUID(plotId)
+
+        # 获取地块信息，同时预加载植物信息
         plot = await Plot.filter(
-            plotId=uuid.UUID(plotId),
+            plotId=plot_uuid,
             userId=user.userId
-        ).prefetch_related(
-            'plantId',
-            Prefetch('log', queryset=Log.all().order_by('timeStamp'))  # 按时间正序排序
-        ).first()
-        
+        ).prefetch_related('plantId').first()
+
         if not plot:
             raise HTTPException(status_code=404, detail="未找到地块或无权访问")
 
         # 验证图片是否合法
         icon_url = validate_image_file(plot.plantId.plantIconURL)
-        
-        # 构建日志列表
-        logs = [
-            LogDetail(
-                logId=str(log.logId),
-                timeStamp=log.timeStamp.strftime("%Y-%m-%d %H:%M:%S"),
-                content=log.content,
-                imagesURL=log.imagesURL
-            )
-            for log in plot.log
-        ]
-            
+        # 获取地块所有日志
+        logs = await get_logs(plotId)
+
         return PlotDetails(
             plotId=str(plot.plotId),
             plotName=plot.plotName,
@@ -118,9 +108,11 @@ async def get_plot_by_id(plotId: str, user: User = Depends(get_current_user)):
             plantIconURL=icon_url,
             logs=logs
         )
-    except ValueError:
-        raise HTTPException(status_code=400, detail="无效的地块ID格式")
+    except ValueError as ve:
+        print(f"ValueError异常: {str(ve)}")
+        raise HTTPException(status_code=400, detail=f"无效的地块ID格式: {str(ve)}")
     except Exception as e:
+        print(f"其他异常: {str(e)}, 类型: {type(e)}")
         raise HTTPException(status_code=500, detail=f"获取地块详情失败: {str(e)}")
 
 
