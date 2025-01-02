@@ -23,6 +23,7 @@ class SignInForm(BaseModel):
 class LogDetail(BaseModel):
     logId: str
     timeStamp: str
+    diseaseName: str
     content: str
     imagesURL: str
 

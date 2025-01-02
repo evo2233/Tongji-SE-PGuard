@@ -36,6 +36,7 @@ class Log(Model):
     logId = fields.UUIDField(pk=True, default=uuid.uuid4)
     plotId = fields.ForeignKeyField('models.Plot', related_name='log', on_delete=fields.CASCADE)  # 级联删除
     timeStamp = fields.DatetimeField(auto_now_add=True)
+    diseaseName = fields.CharField(max_length=40)
     content = fields.TextField()
     imagesURL = fields.CharField(max_length=200)
 
@@ -45,6 +46,7 @@ class Disease(Model):
     plantId = fields.ForeignKeyField('models.Plant', related_name='disease', on_delete=fields.CASCADE)
     diseaseName = fields.CharField(max_length=40)
     advice = fields.TextField()
+    prediction = fields.TextField(null=True)
 
 
 class City(Model):

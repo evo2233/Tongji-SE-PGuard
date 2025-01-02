@@ -6,6 +6,7 @@ from dependencies.auth import get_current_user
 from core.config import validate_image_file
 from typing import List
 from routers.logController import get_logs
+from routers.plotController import get_plot_by_user
 from schemas.form import PlotDetails
 
 plot_api = APIRouter()
@@ -24,9 +25,9 @@ async def get_all_plant_types():
 
 
 @plot_api.get("")
-async def get_all_plots(user: User = Depends(get_current_user)):
+async def get_all_plots():
     try:
-        plots = await Plot.filter(userId=user.userId).prefetch_related('plantId').all()
+        plots = await get_plot_by_user()
         
         result = []
         for plot in plots:
@@ -60,7 +61,7 @@ async def add_plot(
         # 创建新地块
         plot = await Plot.create(
             plotName=plotName,
-            userId=user,    # 这里外键不能传user.userId，而是直接传user
+            userId=user,
             plantId=plant
         )
         
