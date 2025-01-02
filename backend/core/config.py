@@ -13,6 +13,9 @@ RESOURCE_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resour
 if not os.path.exists(RESOURCE_PATH):
     os.makedirs(RESOURCE_PATH)
 
+# 按地块分类存放上传检测图片的文件夹
+UPLOAD_PATH: str = os.path.join(RESOURCE_PATH, "log")
+
 
 def validate_image_file(url: str):
     icon_path = os.path.join(RESOURCE_PATH, url)

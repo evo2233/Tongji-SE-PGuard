@@ -8,6 +8,7 @@ from routers.user import user_api
 from routers.plot import plot_api
 from fastapi.middleware.cors import CORSMiddleware
 from core.config import RESOURCE_PATH
+from routers.detect import detect_api
 
 app = FastAPI(
     title="PGuard API",
@@ -21,6 +22,7 @@ app.mount("/resource", StaticFiles(directory=RESOURCE_PATH), name="resource")
 app.include_router(admin, prefix="/admin", tags=["AdminService"])
 app.include_router(user_api, prefix="/user", tags=["UserService"])
 app.include_router(plot_api, prefix="/plot", tags=["PlotService"])
+app.include_router(detect_api, tags=["DetectService"])
 
 app.add_middleware(
     CORSMiddleware,
