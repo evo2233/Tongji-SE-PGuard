@@ -1,53 +1,13 @@
 import datetime
-import uuid
 from collections import defaultdict
 from typing import List
-from fastapi import HTTPException
-from tortoise.query_utils import Prefetch
-from models.models import Plot, Log
-from routers.detectController import get_prediction_by_name
-from schemas.form import LogDetail, PlotDetails
+from fastapi import HTTPException, Depends
+
+from core.logController import call_get_prediction, call_get_user_plots, get_logs, minus
+from core.userController import get_current_user
+from models.models import User
 from schemas.Map import DISEASE_NAME_RMAP
-
-
-async def set_log(
-        plotId: str,
-        diseaseName: str,
-        advice: str,
-        imageURL: str
-):
-    try:
-        plot = await Plot.get(plotId=plotId)
-        content = f"检测到{diseaseName}，建议：{advice}"
-
-        await Log.create(
-            plotId=plot,
-            diseaseName=diseaseName,
-            content=content,
-            imagesURL=imageURL
-        )
-
-        return "创建日志成功"
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"创建日志失败: {str(e)}")
-
-
-async def get_logs(plotId: str):
-    # 获取地块，同时预加载日志信息（按时间正序排列）
-    plot = await (Plot.filter(plotId=uuid.UUID(plotId))
-                  .prefetch_related(Prefetch('log', queryset=Log.all().order_by('timeStamp'))).first())
-    # 构建日志列表
-    logs = [
-        LogDetail(
-            logId=str(log.logId),
-            timeStamp=log.timeStamp.strftime("%Y-%m-%d %H:%M:%S"),
-            diseaseName=log.diseaseName,
-            content=log.content,
-            imagesURL=log.imagesURL
-        )
-        for log in plot.log
-    ]
-    return logs
+from schemas.form import PlotDetails
 
 
 async def analyze_plot_details(plot_details: List[PlotDetails]):
@@ -71,7 +31,7 @@ async def analyze_plot_details(plot_details: List[PlotDetails]):
                 # 跳过"健康"的检测记录
                 if log.diseaseName in ["健康"]:
                     continue
-                    
+
                 # 修改时间戳解析方式
                 log_date = datetime.datetime.strptime(log.timeStamp.split('.')[0], "%Y-%m-%d %H:%M:%S")
                 if log_date.year == year:
@@ -80,11 +40,11 @@ async def analyze_plot_details(plot_details: List[PlotDetails]):
 
                     # Increment plant-specific disease count
                     plant_disease_count[plot.plantName] += 1
-                    
+
                     # 统计每种疾病的发生次数
                     if log.diseaseName:  # 确保diseaseName不为空
                         disease_count[log.diseaseName] += 1
-                        
+
             except Exception as e:
                 print(f"日期解析错误: {log.timeStamp}, 错误: {str(e)}")
                 continue
@@ -98,7 +58,7 @@ async def analyze_plot_details(plot_details: List[PlotDetails]):
             most_common_disease = disease
 
     diseaseName = DISEASE_NAME_RMAP.get(most_common_disease)
-    prediction = await get_prediction_by_name(diseaseName)
+    prediction = await call_get_prediction(diseaseName)
 
     return {
         "plot_count": plot_count,
@@ -108,3 +68,42 @@ async def analyze_plot_details(plot_details: List[PlotDetails]):
         "disease_count": dict(disease_count),
         "prediction": prediction
     }
+
+
+async def get_summary(user: User = Depends(get_current_user)):
+    try:
+        if not minus(user):
+            raise HTTPException(status_code=400, detail="余额不足，请充值")
+        # 获取用户所有地块
+        plots = await call_get_user_plots(user)
+        if not plots:
+            return {
+                "plot_count": 0,
+                "plant_plot_count": {},
+                "monthly_disease_count": [0] * 12,
+                "plant_disease_count": {}
+            }
+
+        # 构建PlotDetails列表
+        plot_details = []
+        for plot in plots:
+            # 获取地块的所有日志
+            logs = await get_logs(str(plot.plotId))
+
+            plot_details.append(PlotDetails(
+                plotId=str(plot.plotId),
+                plotName=plot.plotName,
+                plantId=str(plot.plantId.plantId),
+                plantName=plot.plantId.plantName,
+                plantFeature=plot.plantId.plantFeature,
+                plantIconURL=plot.plantId.plantIconURL,
+                logs=logs
+            ))
+
+        # 分析所有地块的统计信息
+        summary = await analyze_plot_details(plot_details)
+        return summary
+
+    except Exception as e:
+        print(f"获取统计信息失败: {str(e)}")  # 调试输出
+        raise HTTPException(status_code=500, detail=f"获取统计信息失败: {str(e)}")

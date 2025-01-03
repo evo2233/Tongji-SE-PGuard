@@ -1,10 +1,10 @@
 from fastapi import Depends, HTTPException, status
 from jose import jwt, JWTError
-from core.security import SECRET_KEY, ALGORITHM, is_token_blacklisted
-from models.models import User
-from fastapi.security import OAuth2PasswordBearer
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="user/token")
+from core.config import SECRET_KEY, ALGORITHM, oauth2_scheme
+
+from models.models import User
+
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
@@ -14,6 +14,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     )
     try:
         # 先检查token是否在黑名单中
+        from core.user import is_token_blacklisted
         if is_token_blacklisted(token):
             raise credentials_exception
         
@@ -30,3 +31,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         return user
     except Exception:
         raise credentials_exception
+
+
+async def minus_sum_count(user: User = Depends(get_current_user)):
+    if user.sumCount > 0:
+        user.sumCount -= 1
+        await user.save()
+        return True
+    else:
+        return False

@@ -1,5 +1,7 @@
 from fastapi import HTTPException, Depends
-from dependencies.auth import get_current_user
+
+from core.userController import get_current_user
+from core.logController import get_logs
 from models.models import Plot, User
 
 
@@ -15,7 +17,7 @@ async def get_plot_by_id(plotId: str):
         raise HTTPException(status_code=404, detail=str(e))
 
 
-async def get_plot_by_user(user: User = Depends(get_current_user)):
+async def get_user_plots(user: User = Depends(get_current_user)):
     try:
         plots = await Plot.filter(userId=user.userId).prefetch_related('plantId').all()
 
@@ -24,3 +26,7 @@ async def get_plot_by_user(user: User = Depends(get_current_user)):
 
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+
+async def call_get_logs(plotId: str):
+    return await get_logs(plotId)
