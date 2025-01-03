@@ -15,10 +15,7 @@
           <ion-content>
             <ion-list>
               <ion-item button @click="detectDisease">
-                病害检测
-              </ion-item>
-              <ion-item button @click="detectPest">
-                虫害检测
+                疾病检测
               </ion-item>
               <ion-item button @click="editPlotName">
                 修改名称
@@ -66,7 +63,7 @@
         </ion-list-header>
         <ion-item v-for="(log, index) in plotData.logs" :key="index" lines="full">
           <ion-thumbnail slot="start" v-if="log.imagesURL">
-            <ion-img alt="识别的图片" :src="log.imagesURL" />
+            <ion-img alt="识别的图片" :src="backendUrl+log.imagesURL" />
           </ion-thumbnail>
           <ion-label>
             <h2>{{ log.timeStamp }}</h2>
@@ -102,15 +99,44 @@
         <ion-button expand="full" @click="submitPlotNameChange">确认修改</ion-button>
       </ion-content>
     </ion-modal>
+    <ion-modal :is-open="showDetectModal" @did-dismiss="closeDetectModal">
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>疾病检测</ion-title>
+          <ion-buttons slot="start">
+            <ion-button @click="closeDetectModal">关闭</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <ion-item><input type="file" accept=".jpg,.jpeg,.png" @change="onFileChange" /></ion-item>
+
+        <ion-button expand="full" @click="submitDetect" :disabled="!selectedFile">
+          提交检测
+        </ion-button>
+
+        <ion-card v-if="detectionResult">
+          <ion-card-header>
+            <ion-card-title>检测结果</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <p>病害名称: {{ detectionResult.diseaseName }}</p>
+            <p>建议: {{ detectionResult.advice }}</p>
+            <p>置信度: {{ detectionResult.percent }}%</p>
+            <ion-img :src="`${backendUrl}${detectionResult.imageURL}`" alt="检测图片"></ion-img>
+          </ion-card-content>
+        </ion-card>
+      </ion-content>
+    </ion-modal>
   </ion-page>
 </template>
 
 <script setup lang="ts">
 import { useIonRouter, IonPage, IonContent, IonHeader, IonToolbar, IonTitle, IonCard, IonCardHeader, IonCardTitle,
    IonCardContent, IonItem, IonLabel, IonThumbnail, IonButton, IonButtons, IonBackButton, IonList, IonListHeader,
-   IonCardSubtitle, IonIcon, IonPopover, IonImg, IonModal, IonInput } from '@ionic/vue';
+    IonIcon, IonPopover, IonImg, IonModal, IonInput, onIonViewWillEnter,} from '@ionic/vue';
 import { ellipsisHorizontalOutline } from 'ionicons/icons';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 import { backendUrl } from '@/utils/config';
@@ -185,15 +211,6 @@ const fetchPlotDetails = async () => {
   }
 };
 
-// 点击病害检测
-const detectDisease = () => {
-  presentAlert('提示', '', '病害检测功能未实现');
-};
-
-// 点击虫害检测
-const detectPest = () => {
-  presentAlert('提示', '', '虫害检测功能未实现');
-};
 
 // 删除地块
 const deletePlot = async () => {
@@ -212,7 +229,8 @@ const deletePlot = async () => {
 
     if (response.status === 200) {
       presentAlert('成功', '', '地块已删除');
-      ionRouter.push('/');
+      
+      ionRouter.push('/tabs/home');
     } else {
       presentAlert('错误', '', response.statusText);
     }
@@ -221,12 +239,8 @@ const deletePlot = async () => {
   }
 };
 
-onMounted(() => {
-  if (plotId) {
-    fetchPlotDetails();
-  } else {
-    console.error('plotId is not ready');
-  }
+onIonViewWillEnter(() => {
+  fetchPlotDetails();
 });
 
 interface ChangeNameResponce {
@@ -264,7 +278,7 @@ const submitPlotNameChange = async () => {
 
     const response = await axios.patch<ChangeNameResponce>(
       `${backendUrl}/plot/${plotId}`,
-      { plotName: newPlotName.value },
+      newPlotName.value,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -283,4 +297,66 @@ const submitPlotNameChange = async () => {
     errorAlert(error);
   }
 };
+const showDetectModal = ref(false); // 控制疾病检测模态框的显示
+const selectedFile = ref<File | null>(null); // 用户选择的文件
+const detectionResult = ref<any>(null); // 检测结果
+
+// 打开疾病检测模态框
+const detectDisease = () => {
+  showDetectModal.value = true;
+};
+
+// 关闭疾病检测模态框
+const closeDetectModal = () => {
+  showDetectModal.value = false;
+  selectedFile.value = null;
+  detectionResult.value = null;
+};
+
+// 处理文件选择
+const onFileChange = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target.files && target.files[0]) {
+    selectedFile.value = target.files[0];
+  }
+};
+
+// 提交检测请求
+const submitDetect = async () => {
+  if (!selectedFile.value) {
+    return presentAlert('错误', '', '请先选择图片文件');
+  }
+
+  try {
+    const token = await storage.get('access_token');
+    if (!token) {
+      return ionRouter.push('/login');
+    }
+
+    const formData = new FormData();
+    formData.append('file', selectedFile.value);
+
+    const response = await axios.post(
+      `${backendUrl}/plot/${plotId}/detect`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+
+    if (response.status === 200) {
+      detectionResult.value = response.data;
+      presentAlert('成功', '', '检测完成');
+      fetchPlotDetails();
+    } else {
+      presentAlert('错误', '', response.statusText);
+    }
+  } catch (error: any) {
+    errorAlert(error);
+  }
+};
+
 </script>

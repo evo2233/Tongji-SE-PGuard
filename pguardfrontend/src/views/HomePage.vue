@@ -69,7 +69,11 @@
           </ion-item>
           <ion-item>
             <ion-label position="stacked">作物名称</ion-label>
-            <ion-input v-model="newPlot.plantName" placeholder="请输入作物名称"></ion-input>
+            <ion-select v-model="newPlot.plantName" placeholder="选择作物">
+              <ion-select-option v-for="(plant, index) in plantOptions" :key="index" :value="plant">
+                {{ plant }}
+              </ion-select-option>
+            </ion-select>
           </ion-item>
         </ion-list>
         <ion-button expand="full" @click="submitNewPlot">提交</ion-button>
@@ -80,10 +84,10 @@
 <script setup lang="ts">
 import { useIonRouter,IonPage, IonHeader, IonToolbar, IonContent,IonCard,IonCardHeader,IonCardTitle,
   IonGrid,IonRow,IonCol,IonSearchbar,IonCardSubtitle,IonFab,IonFabButton,IonIcon,IonModal,IonTitle,IonButtons,
-  IonButton,IonList,IonItem,IonLabel,IonInput,IonImg, onIonViewWillEnter,IonCardContent } from '@ionic/vue';
+  IonButton,IonList,IonItem,IonLabel,IonInput,IonImg, onIonViewWillEnter,IonCardContent,IonSelect,IonSelectOption } from '@ionic/vue';
 import { sunnyOutline, moonOutline, rainyOutline, snowOutline, partlySunnyOutline, cloudyNightOutline, cloudyOutline ,addOutline} from 'ionicons/icons';
 
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 import { backendUrl } from '@/utils/config';
 import { presentAlert, errorAlert } from '@/utils/alert';
 import { getWeather } from '@/utils/weather';
@@ -96,13 +100,12 @@ interface PlotResponse {
   plotName: string;
   plantName: string;
 }
-
 const ionRouter = useIonRouter();
 const cards = ref<PlotResponse[]>([]); // 原始卡片数据
 const searchQuery = ref(''); // 搜索关键词
 const isModalOpen = ref(false); // 控制模态窗口开关
 const newPlot = ref({ plotName: '', plantName: '' }); // 新地块数据
-
+const plantOptions = ref<string[]>([]); // 可选植物列表
 // 动态过滤卡片列表，支持主标题和副标题搜索
 const filteredCards = computed(() =>
   cards.value.filter(
@@ -137,7 +140,9 @@ const fetchCards = async () => {
 };
 
 // 打开模态窗口
-const openModal = () => {
+const openModal = async () => {
+  await fetchPlants();
+  console.log(plantOptions);
   isModalOpen.value = true;
 };
 
@@ -172,7 +177,7 @@ const submitNewPlot = async () => {
     if (response.status === 200 || response.status === 201) {
       presentAlert('成功', '', '地块创建成功！');
       closeModal();
-      fetchCards(); 
+      fetchCards();
     } else {
       presentAlert('错误', '', response.statusText);
     }
@@ -224,10 +229,18 @@ const getNightWeatherIcon = computed(() => {
   }
   return moonOutline; // 默认返回晴天图标
 });
-onMounted(() => {
-  fetchWeather();
-  fetchCards();
-});
+const fetchPlants = async () => {
+  try {
+    const response = await axios.get<string[]>(`${backendUrl}/plot/plant`);
+    if (response.status === 200) {
+      plantOptions.value = response.data; // 直接将植物名称数组赋值给 plantOptions
+    } else {
+      presentAlert('错误', '', '获取植物列表失败');
+    }
+  } catch (error: any) {
+    errorAlert(error);
+  }
+};
 
 onIonViewWillEnter(() => {
   fetchWeather();
