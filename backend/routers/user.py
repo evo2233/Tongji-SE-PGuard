@@ -1,13 +1,14 @@
 from fastapi import APIRouter, Depends, Body
 from typing import List
 
+from core.dependency import get_current_user, oauth2_scheme
+
 from schemas.form import SignUpForm, SignInForm
 from models.models import User
-from core.userController import get_current_user, oauth2_scheme
 
-import core.user as u
-import core.package as pk
-import core.city as c
+import service.user as u
+import service.package as pk
+import service.city as c
 
 
 user_api = APIRouter()

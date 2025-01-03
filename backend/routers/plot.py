@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends, Body
 from typing import List
 
+from core.dependency import get_current_user
+
 from schemas.form import PlotDetails
 from models.models import User
-from core.userController import get_current_user
 
-import core.plot as p
-import core.plant as pl
+import service.plot as p
+import service.plant as pl
 
 
 plot_api = APIRouter()

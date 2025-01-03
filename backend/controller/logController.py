@@ -2,19 +2,14 @@ import uuid
 from fastapi import HTTPException, Depends
 from tortoise.query_utils import Prefetch
 
+from core.dependency import get_current_user
+
 from models.models import Plot, Log, User
 from schemas.form import LogDetail
-from core.userController import get_current_user, minus_sum_count
-from core.plotController import get_user_plots
-from core.detectController import get_prediction_by_name
+from controller.userController import minus_sum_count
 
 
-async def set_log(
-        plotId: str,
-        diseaseName: str,
-        advice: str,
-        imageURL: str
-):
+async def set_log(plotId: str, diseaseName: str, advice: str, imageURL: str):
     try:
         plot = await Plot.get(plotId=plotId)
         content = f"检测到{diseaseName}，建议：{advice}"
@@ -49,12 +44,12 @@ async def get_logs(plotId: str):
     return logs
 
 
-async def call_get_user_plots(user: User = Depends(get_current_user)):
-    return await get_user_plots(user)
+#async def call_get_user_plots(user: User = Depends(get_current_user)):
+#    return await get_user_plots(user)
 
 
-async def call_get_prediction(diseaseName: str):
-    return await get_prediction_by_name(diseaseName)
+#async def call_get_prediction(diseaseName: str):
+#    return await get_prediction_by_name(diseaseName)
 
 
 async def minus(user: User = Depends(get_current_user)):

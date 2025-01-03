@@ -14,29 +14,20 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     )
     try:
         # 先检查token是否在黑名单中
-        from core.user import is_token_blacklisted
+        from service.user import is_token_blacklisted
         if is_token_blacklisted(token):
             raise credentials_exception
-        
+
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: str = payload.get("sub")
         if user_id is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-        
+
     try:
         # 使用 userId 查询用户
         user = await User.get(userId=user_id)
         return user
     except Exception:
         raise credentials_exception
-
-
-async def minus_sum_count(user: User = Depends(get_current_user)):
-    if user.sumCount > 0:
-        user.sumCount -= 1
-        await user.save()
-        return True
-    else:
-        return False

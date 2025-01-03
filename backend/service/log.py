@@ -3,11 +3,14 @@ from collections import defaultdict
 from typing import List
 from fastapi import HTTPException, Depends
 
-from core.logController import call_get_prediction, call_get_user_plots, get_logs, minus
-from core.userController import get_current_user
+from controller.logController import minus, get_logs
+from core.dependency import get_current_user
+
 from models.models import User
 from schemas.Map import DISEASE_NAME_RMAP
 from schemas.form import PlotDetails
+from controller.detectController import get_prediction_by_name
+from controller.plotController import get_user_plots
 
 
 async def analyze_plot_details(plot_details: List[PlotDetails]):
@@ -58,7 +61,7 @@ async def analyze_plot_details(plot_details: List[PlotDetails]):
             most_common_disease = disease
 
     diseaseName = DISEASE_NAME_RMAP.get(most_common_disease)
-    prediction = await call_get_prediction(diseaseName)
+    prediction = await get_prediction_by_name(diseaseName)
 
     return {
         "plot_count": plot_count,
@@ -75,7 +78,7 @@ async def get_summary(user: User = Depends(get_current_user)):
         if not minus(user):
             raise HTTPException(status_code=400, detail="余额不足，请充值")
         # 获取用户所有地块
-        plots = await call_get_user_plots(user)
+        plots = await get_user_plots(user)
         if not plots:
             return {
                 "plot_count": 0,

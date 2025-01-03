@@ -4,10 +4,10 @@ from fastapi import HTTPException, Depends, Body
 from tortoise.exceptions import DoesNotExist
 
 from core.config import RESOURCE_PATH, ALLOWED_IMAGE_TYPES
+from core.dependency import get_current_user
 
 from models.models import Plant, Plot, User
-from core.plotController import get_user_plots, call_get_logs
-from core.userController import get_current_user
+from controller.plotController import get_user_plots, call_get_logs
 from schemas.form import PlotDetails
 
 

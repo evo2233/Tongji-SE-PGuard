@@ -1,8 +1,9 @@
 from fastapi import HTTPException, Depends
 
-from core.logController import set_log
-from core.plotController import get_plot_by_id
-from core.userController import get_current_user
+from controller.logController import set_log
+from core.dependency import get_current_user
+
+from controller.plotController import get_plot_by_id
 from models.models import User, Disease
 
 
@@ -17,12 +18,7 @@ async def validate_plot_access(plotId: str, user: User = Depends(get_current_use
         raise HTTPException(status_code=404, detail=f"地块验证失败: {str(e)}")
 
 
-async def call_set_log(
-        plotId: str,
-        name: str,
-        advice: str,
-        save_path: str
-):
+async def call_set_log(plotId: str, name: str, advice: str, save_path: str):
     return await set_log(plotId, name, advice, save_path)
 
 

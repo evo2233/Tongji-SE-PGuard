@@ -1,7 +1,8 @@
 from fastapi import HTTPException, Depends
 
-from core.userController import get_current_user
-from core.logController import get_logs
+from core.dependency import get_current_user
+
+from controller.logController import get_logs
 from models.models import Plot, User
 
 

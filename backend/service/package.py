@@ -1,7 +1,8 @@
 import uuid
 from fastapi import HTTPException, Depends
 
-from core.userController import get_current_user
+from core.dependency import get_current_user
+
 from models.models import Package, User
 
 

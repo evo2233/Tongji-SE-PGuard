@@ -4,10 +4,10 @@ import uuid
 
 from fastapi import HTTPException, UploadFile, Depends
 from core.config import ULTRALYTICS_PATH, UPLOAD_PATH
+from core.dependency import get_current_user
 
 from models.models import Disease, User
-from core.detectController import validate_plot_access, call_set_log
-from core.userController import get_current_user
+from controller.detectController import validate_plot_access, call_set_log
 from schemas.Map import PLANT_NAME_MAP, DISEASE_NAME_MAP
 
 

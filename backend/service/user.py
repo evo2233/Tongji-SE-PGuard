@@ -4,11 +4,11 @@ from jose import jwt, JWTError
 
 from database.redis_config import RedisConfig
 from core.config import pwd_context, SECRET_KEY, ALGORITHM, REFRESH_TOKEN_EXPIRE_DAYS, oauth2_scheme
+from core.dependency import get_current_user
 
 from schemas.form import SignUpForm, SignInForm
 from models.models import User
-from core.userController import get_current_user
-from core.cityController import validate_location
+from controller.weatherController import validate_location
 
 
 def verify_password(plain_password, hashed_password):

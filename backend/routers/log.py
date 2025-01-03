@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends
-from core.userController import get_current_user
+
+from core.dependency import get_current_user
+
 from models.models import User
 
-import core.log as lo
+import service.log as lo
 
 log_api = APIRouter()
 

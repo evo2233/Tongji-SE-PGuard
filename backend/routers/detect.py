@@ -1,8 +1,10 @@
 from fastapi import APIRouter, UploadFile, Depends
-from core.userController import get_current_user
+
+from core.dependency import get_current_user
+
 from models.models import User
 
-import core.detect as d
+import service.detect as d
 
 detect_api = APIRouter()
 
