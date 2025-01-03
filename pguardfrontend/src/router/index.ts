@@ -47,11 +47,11 @@ const routes: Array<RouteRecordRaw> = [
     component:()=> import('@/views/SignupPage.vue')
   }
 ]
-function checkLoginStatus() {
-  return storage.get('access_token').then(token => {
-    console.log(token); 
-    return !!token; 
-  });
+
+async function checkLoginStatus() {
+  const token = await (await storage).get('access_token');
+  console.log(token); 
+  return !!token; 
 }
 
 const router = createRouter({

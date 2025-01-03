@@ -62,9 +62,9 @@
       const thirtyMinutesLater = new Date(now.getTime() + refreshGap); 
       const timestamp = thirtyMinutesLater.getTime(); 
       await Promise.all([
-        storage.set('access_token', access_token),
-        storage.set('refresh_token', refresh_token),
-        storage.set('refresh_time', timestamp),
+        (await storage).set('access_token', access_token),
+        (await storage).set('refresh_token', refresh_token),
+        (await storage).set('refresh_time', timestamp),
       ]);
       startTokenRefreshTask();
       ionRouter.push('/tabs/home');

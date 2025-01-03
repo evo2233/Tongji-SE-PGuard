@@ -44,7 +44,7 @@ const getCurrentHour = (): number => new Date().getHours();
 // 获取用户城市代码
 const getUserCityCode = async (): Promise<string | null> => {
   try {
-    const token = await storage.get('access_token');
+    const token = await (await storage).get('access_token');
     if (!token) {
       return null;  // 如果没有 token，返回 null
     }
@@ -73,7 +73,7 @@ const fetchWeatherData = async (cityCode: string): Promise<Forecast | null> => {
 
     if (response.data.status === '1' && response.data.forecasts && response.data.forecasts.length > 0) {
       const weatherData = response.data.forecasts[0];  // 获取第一个天气预报
-      await storage.set('weatherData', weatherData);  // 存储天气数据
+      await (await storage).set('weatherData', weatherData);  // 存储天气数据
       return weatherData;  // 返回天气数据
     } else {
       return null;  // 如果返回数据格式不正确，返回 null
@@ -88,7 +88,7 @@ const fetchWeatherData = async (cityCode: string): Promise<Forecast | null> => {
 export const getWeather = async (): Promise<{} | Forecast> => {
     try {
       // 获取存储中的天气信息
-      const storedWeatherData = await storage.get('weatherData');
+      const storedWeatherData = await (await storage).get('weatherData');
       const userCityCode = await getUserCityCode();
   
       if (!userCityCode) {

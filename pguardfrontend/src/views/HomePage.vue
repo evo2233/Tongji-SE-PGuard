@@ -117,7 +117,7 @@ const filteredCards = computed(() =>
 
 const fetchCards = async () => {
   try {
-    const token = await storage.get('access_token');
+    const token = await (await storage).get('access_token');
     if (!token) {
       ionRouter.push('/login');
       return;
@@ -155,7 +155,7 @@ const closeModal = () => {
 // 提交新地块数据
 const submitNewPlot = async () => {
   try {
-    const token = await storage.get('access_token');
+    const token = await (await storage).get('access_token');
     if (!token) {
       ionRouter.push('/login');
       return;

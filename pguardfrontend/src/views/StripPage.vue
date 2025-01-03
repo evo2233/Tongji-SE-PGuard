@@ -189,7 +189,7 @@ const truncatedFeature = computed(() =>
 // 获取地块详情
 const fetchPlotDetails = async () => {
   try {
-    const token = await storage.get('access_token');
+    const token = await (await storage).get('access_token');
     if (!token) {
       ionRouter.push('/login');
       return;
@@ -215,7 +215,7 @@ const fetchPlotDetails = async () => {
 // 删除地块
 const deletePlot = async () => {
   try {
-    const token = await storage.get('access_token');
+    const token = await (await storage).get('access_token');
     if (!token) {
       ionRouter.push('/login');
       return;
@@ -267,7 +267,7 @@ const closeModal = () => {
 // 提交名称更改
 const submitPlotNameChange = async () => {
   try {
-    const token = await storage.get('access_token');
+    const token = await (await storage).get('access_token');
     if (!token) {
       return ionRouter.push('/login');
     }
@@ -328,7 +328,7 @@ const submitDetect = async () => {
   }
 
   try {
-    const token = await storage.get('access_token');
+    const token = await (await storage).get('access_token');
     if (!token) {
       return ionRouter.push('/login');
     }

@@ -233,7 +233,7 @@ interface CityResponse {
 }
 const fetchInfos = async () => {
   try {
-    const token = await storage.get('access_token');
+    const token = await (await storage).get('access_token');
     if(!token){
       ionRouter.push("/login");
       return;
@@ -260,7 +260,7 @@ const fetchInfos = async () => {
 
 const logout = async () => {
   try {
-    const token = await storage.get('access_token');
+    const token = await (await storage).get('access_token');
     if (!token) {
       ionRouter.push("/login");
       return;
@@ -284,7 +284,7 @@ const logout = async () => {
     errorAlert(error);
     return; 
   }
-  await storage.clear();
+  await (await storage).clear();
   ionRouter.push("/login");
 };
 
@@ -337,7 +337,7 @@ const updateUserInfo = async () => {
   }
 
   try {
-    const token = await storage.get('access_token');
+    const token = await (await storage).get('access_token');
     if (!token) {
       ionRouter.push("/login");
       return;
@@ -397,7 +397,7 @@ const closeRechargeModal = () => {
 // 获取可用套餐信息
 const fetchAvailablePackages = async () => {
   try {
-    const token = await storage.get('access_token');
+    const token = await (await storage).get('access_token');
     if (!token) {
       ionRouter.push("/login");
       return;
@@ -427,7 +427,7 @@ const confirmPayment = async () => {
   }
 
   try {
-    const token = await storage.get('access_token');
+    const token = await (await storage).get('access_token');
     if (!token) {
       ionRouter.push("/login");
       return;
@@ -462,7 +462,7 @@ const summaryData = ref<any>(null);
 
 const fetchSummary = async () => {
   try {
-    const token = await storage.get("access_token");
+    const token = await (await storage).get("access_token");
     if (!token) {
       ionRouter.push("/login");
       return;

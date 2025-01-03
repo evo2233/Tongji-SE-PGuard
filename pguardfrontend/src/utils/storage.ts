@@ -2,8 +2,9 @@ import { Storage } from '@ionic/storage';
 
 const storage = new Storage();
 
-await storage.create();
+async function initStorage() {
+  await storage.create();
+  return storage;
+}
 
-//await storage.clear();
-
-export default storage;
+export default initStorage();

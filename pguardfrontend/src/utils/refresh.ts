@@ -5,38 +5,38 @@ import { backendUrl } from './config';
 import { useIonRouter } from '@ionic/vue';
 import { presentAlert, errorAlert } from '@/utils/alert';
 const storage = new Storage();
-await storage.create();
+await (await storage).create();
 interface RefreshResponce{
     access_token:string
 }
 const TokenService = {
   async getRefreshTime() {
-    return await storage.get('refresh_time');
+    return await (await storage).get('refresh_time');
   },
 
   async setRefreshTime(refreshTime: number) {
-    await storage.set('refresh_time', refreshTime);
+    await (await storage).set('refresh_time', refreshTime);
   },
 
   async getAccessToken() {
-    return await storage.get('access_token');
+    return await (await storage).get('access_token');
   },
 
   async setAccessToken(token: string) {
-    await storage.set('access_token', token);
+    await (await storage).set('access_token', token);
   },
 
   async clearTokens() {
-    await storage.remove('access_token');
-    await storage.remove('refresh_token');
-    await storage.remove('refresh_time');
+    await (await storage).remove('access_token');
+    await (await storage).remove('refresh_token');
+    await (await storage).remove('refresh_time');
     const ionRouter = useIonRouter();
     ionRouter.push('/login');
   },
 
   async refreshAccessToken() {
-    const refreshToken = await storage.get('refresh_token');
-    const oldToken = await storage.get('access_token');
+    const refreshToken = await (await storage).get('refresh_token');
+    const oldToken = await (await storage).get('access_token');
     try {
       const response = await axios.post<RefreshResponce>(backendUrl+'/user/refresh', 
         refreshToken ,
