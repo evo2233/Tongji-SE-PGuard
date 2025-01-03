@@ -1,30 +1,11 @@
-from dotenv import load_dotenv
-import os
+from fastapi import Depends, HTTPException
 from datetime import datetime, timedelta
-from jose import jwt, JWTError
-from passlib.context import CryptContext
+from jose import jwt
 from database.redis_config import RedisConfig
 
-# 仅用于开发环境加载.env
-load_dotenv()
-
-if os.getenv("SECRET_KEY"):
-    SECRET_KEY = os.getenv('SECRET_KEY')
-else:
-    raise ValueError("SECRET_KEY environment variable not set")
-ALGORITHM = os.getenv('ALGORITHM')  # 加密算法
-ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 令牌有效期
-REFRESH_TOKEN_EXPIRE_DAYS = 30  # refresh token有效期30天
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")  # bcrypt加密密码(不能解密)
-
-
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
-
-
-def get_password_hash(password):
-    return pwd_context.hash(password)
+from core.config import SECRET_KEY, ALGORITHM, REFRESH_TOKEN_EXPIRE_DAYS, oauth2_scheme
+from core.dependency import get_current_user
+from models.models import User
 
 
 def create_access_token(data: dict, expires_delta: timedelta = None):
@@ -66,3 +47,20 @@ def is_token_blacklisted(token: str) -> bool:
     """检查token是否在黑名单中"""
     redis_client = RedisConfig.get_client()
     return bool(redis_client.get(f"blacklist:{token}"))
+
+
+async def logout(current_token: str = Depends(oauth2_scheme)):
+    if not is_token_blacklisted(current_token):
+        invalidate_token(current_token)
+        return {"登出成功"}
+    else:
+        raise HTTPException(status_code=401, detail="无效的access token")
+
+
+async def minus_sum_count(user: User = Depends(get_current_user)):
+    if user.sumCount > 0:
+        user.sumCount -= 1
+        await user.save()
+        return True
+    else:
+        return False

@@ -1,14 +1,40 @@
 """
 本文件用于管理员操作的API实现
 """
+import os
+import csv
 import uuid
+from core.config import RESOURCE_PATH
 from fastapi import APIRouter, HTTPException, Query
 from models.models import Package, Plant, City, Disease
 from typing import List
-from core.config import validate_city_file
 from schemas.Map import PLANT_NAME_MAP
 
 admin = APIRouter()
+
+
+def validate_city_file(url: str):
+    # 验证文件是否存在
+    csvURL = os.path.join(RESOURCE_PATH, url)
+    if not os.path.exists(csvURL):
+        raise HTTPException(status_code=404, detail="CSV文件不存在")
+
+    # 验证文件扩展名
+    file_ext = os.path.splitext(csvURL)[1].lower()
+    if file_ext != '.csv':
+        raise HTTPException(status_code=400, detail="文件格式必须是CSV")
+
+    # 读取CSV文件
+    try:
+        file = open(csvURL, 'r', encoding='utf-8')
+        csv_reader = csv.reader(file)
+        return csv_reader, file  # 返回reader和file对象，以便后续关闭文件
+    except UnicodeDecodeError:
+        raise HTTPException(status_code=400, detail="CSV文件编码必须是UTF-8")
+    except csv.Error as e:
+        raise HTTPException(status_code=400, detail=f"CSV文件格式错误: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"读取CSV文件失败: {str(e)}")
 
 
 @admin.post('/package/add')
