@@ -1,11 +1,9 @@
 export const refreshGap = 30*60*1000;
 import axios from 'axios';
-import { Storage } from '@ionic/storage';
+import storage from '@/utils/storage';
 import { backendUrl } from './config';
 import { useIonRouter } from '@ionic/vue';
 import { presentAlert, errorAlert } from '@/utils/alert';
-const storage = new Storage();
-await (await storage).create();
 interface RefreshResponce{
     access_token:string
 }

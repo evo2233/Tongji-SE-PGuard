@@ -478,7 +478,9 @@ const fetchSummary = async () => {
       summaryData.value = response.data;
       isSummaryModalOpen.value = true;
       fetchInfos();
-    } else {
+    } else if(response.status === 400){
+      presentAlert("余额不足，请充值","","");
+    }else{
       presentAlert("错误", "获取总结失败", response.statusText);
     }
   } catch (error: any) {
