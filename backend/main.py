@@ -6,11 +6,11 @@ from database.settings import TORTOISE_ORM
 from fastapi.middleware.cors import CORSMiddleware
 from core.config import RESOURCE_PATH
 
-from routers.admin import admin
-from routers.user import user_api
-from routers.plot import plot_api
-from routers.detect import detect_api
-from routers.log import log_api
+from controller.adminController import admin
+from controller.userController import user_api
+from controller.plotController import plot_api
+from controller.detectController import detect_api
+from controller.logController import log_api
 
 app = FastAPI(
     title="PGuard API",

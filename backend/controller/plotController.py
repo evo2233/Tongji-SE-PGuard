@@ -1,33 +1,46 @@
-from fastapi import HTTPException, Depends
+﻿from fastapi import APIRouter, Depends, Body
+from entities.models import User
+from core.auth import get_current_user
+from typing import List
+from entities.form import PlotDetails
+from service.plotService import all_plant_name, all_plot, create_plot, make_plot_detail, change_plot_name, del_plot
 
-from core.dependency import get_current_user
-
-from controller.logController import get_logs
-from models.models import Plot, User
-
-
-async def get_plot_by_id(plotId: str):
-    try:
-        # 同时预加载 userId 和 plantId 的关联数据
-        plot = await Plot.get(plotId=plotId).select_related("userId", "plantId")
-
-        if plot:
-            return plot
-
-    except Exception as e:
-        raise HTTPException(status_code=404, detail=str(e))
+plot_api = APIRouter()
 
 
-async def get_user_plots(user: User = Depends(get_current_user)):
-    try:
-        plots = await Plot.filter(userId=user.userId).prefetch_related('plantId').all()
-
-        if plots:
-            return plots
-
-    except Exception as e:
-        raise HTTPException(status_code=404, detail=str(e))
+@plot_api.get('/plant', response_model=List[str])
+async def get_all_plant_types():
+    await all_plant_name()
 
 
-async def call_get_logs(plotId: str):
-    return await get_logs(plotId)
+@plot_api.get("")
+async def get_all_plots(user: User = Depends(get_current_user)):
+    await all_plot(user)
+
+
+@plot_api.post("/add")
+async def add_plot(
+    plotName: str = Body(...),
+    plantName: str = Body(...),
+    user: User = Depends(get_current_user)
+):
+    await create_plot(plotName, plantName, user)
+
+
+@plot_api.get("/{plotId}", response_model=PlotDetails)
+async def get_plot_detail(plotId: str, user: User = Depends(get_current_user)):
+    await make_plot_detail(plotId, user)
+
+
+@plot_api.patch("/{plotId}")
+async def update_plot_name(
+    plotId: str,
+    plotName: str = Body(...),
+    user: User = Depends(get_current_user)
+):
+    await change_plot_name(plotId, plotName, user)
+
+
+@plot_api.delete("/{plotId}")
+async def delete_plot(plotId: str, user: User = Depends(get_current_user)):
+    await del_plot(plotId, user)

@@ -26,8 +26,8 @@ TORTOISE_ORM = {
         }
     },
     'apps': {
-        'models': {
-            'models': ['models.models', 'aerich.models'],
+        'entities': {
+            'entities': ['entities.entities', 'aerich.entities'],
             'default_connection': 'default',
         }
     },
