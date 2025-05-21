@@ -3,8 +3,8 @@ import uuid
 from fastapi import HTTPException
 
 from core.config import validate_city_file
-from entities.models import Package, Plant, City, Disease
-from entities.Map import PLANT_NAME_MAP
+from models.models import Package, Plant, City, Disease
+from models.Map import PLANT_NAME_MAP
 
 
 async def create_package(packageName, price, sumNum):

@@ -34,7 +34,7 @@
 - `backend/`：后端服务代码
   - `service/`：业务逻辑实现
   - `controller/`：API路由
-  - `entities/` 
+  - `models/` 
     * `model.py`：数据库模型定义
   - `core/`：核心依赖配置
   - `database/`：数据库配置

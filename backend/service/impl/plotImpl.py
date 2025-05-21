@@ -1,6 +1,6 @@
 from fastapi import HTTPException, Depends
 from core.auth import get_current_user
-from entities.models import Plot, User
+from models.models import Plot, User
 
 
 async def get_plot_by_id(plotId: str):

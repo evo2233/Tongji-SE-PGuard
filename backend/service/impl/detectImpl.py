@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 
-from entities.models import Disease
+from models.models import Disease
 
 
 async def get_prediction_by_name(diseaseName: str):

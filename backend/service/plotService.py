@@ -4,8 +4,8 @@ from fastapi import HTTPException
 from tortoise.exceptions import DoesNotExist
 
 from core.config import validate_image_file
-from entities.models import Plant, Plot
-from entities.form import PlotDetails
+from models.models import Plant, Plot
+from models.form import PlotDetails
 from service.impl.logImpl import get_logs
 from service.impl.plotImpl import get_plot_by_user
 

@@ -1,9 +1,9 @@
 from fastapi import HTTPException
 
-from controller.userController import minus_sum_count
-from entities.form import PlotDetails
+from models.form import PlotDetails
 from service.impl.logImpl import get_logs, analyze_plot_details
 from service.impl.plotImpl import get_plot_by_user
+from service.userService import minus_sum_count
 
 
 async def make_summarize(user):

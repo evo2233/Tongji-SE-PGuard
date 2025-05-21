@@ -1,8 +1,8 @@
 ﻿from fastapi import APIRouter, Depends, Body
-from entities.models import User
+from models.models import User
 from core.auth import get_current_user
 from typing import List
-from entities.form import PlotDetails
+from models.form import PlotDetails
 from service.plotService import all_plant_name, all_plot, create_plot, make_plot_detail, change_plot_name, del_plot
 
 plot_api = APIRouter()

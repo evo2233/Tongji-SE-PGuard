@@ -6,6 +6,7 @@ import os
 # 加载环境变量
 load_dotenv()
 
+
 class RedisConfig:
     _instance: Optional[redis.Redis] = None
 
@@ -18,4 +19,4 @@ class RedisConfig:
                 db=int(os.getenv('REDIS_DB', 0)),
                 decode_responses=True  # 自动将字节解码为字符串
             )
-        return cls._instance 
+        return cls._instance

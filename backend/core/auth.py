@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException, status
 from jose import jwt, JWTError
 from core.security import SECRET_KEY, ALGORITHM, is_token_blacklisted
-from entities.models import User
+from models.models import User
 from fastapi.security import OAuth2PasswordBearer
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="user/token")

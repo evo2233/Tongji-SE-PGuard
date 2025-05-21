@@ -1,6 +1,6 @@
 ﻿from fastapi import APIRouter, UploadFile, Depends
 from core.auth import get_current_user
-from entities.models import User
+from models.models import User
 from service.detectService import do_detect
 
 detect_api = APIRouter()

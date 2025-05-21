@@ -8,7 +8,7 @@ from core.config import validate_location
 from core.security import get_password_hash, verify_password, create_access_token, create_refresh_token, decode_token, \
     is_token_blacklisted, invalidate_token
 from core.auth import get_current_user
-from entities.models import User, City, Package
+from models.models import User, City, Package
 
 
 async def minus_sum_count(user: User = Depends(get_current_user)):

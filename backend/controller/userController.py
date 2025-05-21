@@ -1,7 +1,7 @@
 ﻿from fastapi import APIRouter, Depends, Body
 from core.auth import get_current_user, oauth2_scheme
-from entities.models import User
-from entities.form import SignUpForm, SignInForm
+from models.models import User
+from models.form import SignUpForm, SignInForm
 from typing import List
 
 from service.userService import get_city, get_city_code, add_user, generate_token, renew_token, change_user_info, \

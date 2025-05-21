@@ -4,10 +4,10 @@ from collections import defaultdict
 from typing import List
 from fastapi import HTTPException
 from tortoise.query_utils import Prefetch
-from entities.models import Plot, Log
+from models.models import Plot, Log
 from service.impl.detectImpl import get_prediction_by_name
-from entities.form import LogDetail, PlotDetails
-from entities.Map import DISEASE_NAME_RMAP
+from models.form import LogDetail, PlotDetails
+from models.Map import DISEASE_NAME_RMAP
 
 
 async def set_log(

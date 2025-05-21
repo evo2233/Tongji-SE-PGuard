@@ -2,7 +2,7 @@ import csv
 import os
 from typing import Set
 from fastapi import HTTPException
-from entities.models import City
+from models.models import City
 
 # 允许的图片类型
 ALLOWED_IMAGE_TYPES: Set[str] = {'.jpg', '.jpeg', '.png'}

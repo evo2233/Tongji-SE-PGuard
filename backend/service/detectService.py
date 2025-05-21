@@ -5,7 +5,7 @@ from fastapi import HTTPException
 
 from core.config import UPLOAD_PATH
 from core.yolov8 import detect
-from entities.Map import PLANT_NAME_MAP, DISEASE_NAME_MAP
+from models.Map import PLANT_NAME_MAP, DISEASE_NAME_MAP
 from service.impl.detectImpl import get_advice
 from service.impl.logImpl import set_log
 from service.impl.plotImpl import get_plot_by_id
