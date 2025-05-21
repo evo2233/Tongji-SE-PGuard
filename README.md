@@ -33,19 +33,17 @@
 
 - `backend/`：后端服务代码
   - `service/`：业务逻辑实现
-    - `detect.py`：病害检测服务
-    - `log.py`：日志分析服务
-    - `plot.py`：地块管理服务
-  - `routers/`：API路由 **(Controller)**
-    - `admin.py`：管理员相关API
-    - `plot.py`：地块相关API
-  - `models/`：数据库模型定义
-  - `schemas/`：数据模式定义
-  - `controller/`：子系统交互层
+  - `controller/`：API路由
+  - `entities/` 
+    * `model.py`：数据库模型定义
   - `core/`：核心依赖配置
+  - `database/`：数据库配置
+    * `settings.py`：PostgreSQL
+    * `redis_config.py`：Redis
 - `yolov8/`：YOLOv8模型相关文件
-  - `Grape_defect.py`：葡萄病害检测脚本
-  - `Potato_defect.py`：马铃薯病害检测脚本
+  * `ultralytics-main` 
+    * `Grape_defect.py`：葡萄病害检测脚本
+    * `Potato_defect.py`：马铃薯病害检测脚本
 
 ## 后端部署
 
@@ -72,6 +70,4 @@
    ```
 
 4. 运行后端项目：在命令行中，切换到`main.py`所在的目录，然后运行`uvicorn main:app --reload`。
-
-
 
