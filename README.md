@@ -8,7 +8,7 @@
 
 电话：+86 13614356534
 
-邮箱：yuransong233@gmail.com
+邮箱：3759790650@qq.com
 
 **项目贡献：**
 
@@ -47,18 +47,31 @@
   - `Grape_defect.py`：葡萄病害检测脚本
   - `Potato_defect.py`：马铃薯病害检测脚本
 
-## 环境依赖
+## 后端部署
 
-请确保你的环境已安装以下依赖：
+1. 请确保你的环境已安装以下依赖：
 
-- Python 3.8
-- 注意yolov8模型与后端是运行于不同的环境中的微服务。
-- 其他依赖请参考 `yolov8/说明文档.md` 中的依赖列表以及`backend`目录下的`requirement.txt`。
+- Python 3.8，其他依赖请参考`backend\requirements.txt`。
+- yolov8 模型与后端是运行于不同的环境中的微服务，依赖请参考 `yolov8\说明文档.md`。
+- 数据存储(本项目部署在WindowsServer2019上，Linux服务器选择匹配的版本即可)：
+  * PostgreSQL-16.6-1-windows-x64
+  * Redis-x64-3.0.504
 
-## 使用说明
+2. 开启PostgreSQL服务、Redis服务
 
-1. **安装依赖**：根据 `yolov8/说明文档.md` 安装所需的Python包。
-2. **配置环境**：设置必要的环境变量，如 `SECRET_KEY`。
-3. **运行服务**：启动后端服务，以及Redis缓存服务器。
-4. **上传图片**：通过前端界面上传植物图片，获取病害检测结果和建议。
+3. 在`backend`目录创建`.env`文件
+
+   ```.env
+   DB_HOST=
+   DB_PWD=
+   SECRET_KEY= # 随机生成一个长度为 32 的随机字符串
+   ALGORITHM = "HS256"
+   REDIS_HOST=localhost
+   REDIS_PORT=6379
+   REDIS_DB=0
+   ```
+
+4. 运行后端项目：在命令行中，切换到`main.py`所在的目录，然后运行`uvicorn main:app --reload`。
+
+
 
