@@ -71,3 +71,6 @@
 
 4. 运行后端项目：在命令行中，切换到`main.py`所在的目录，然后运行`uvicorn main:app --reload`。
 
+## 常见问题
+
+1. 调用`user/city/{keyword}`等出现`Request path contains unescaped characters`。是因为请求 URL 中包含了未转义的非 ASCII 字符（如中文）导致的。如果路径参数中包含了中文，必须进行 **URL 编码**（percent-encoding）处理。

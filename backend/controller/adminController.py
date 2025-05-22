@@ -15,12 +15,12 @@ async def add_package(
         price: float = Query(...),
         sumNum: int = Query(...)
 ):
-    await create_package(packageName, price, sumNum)
+    return await create_package(packageName, price, sumNum)
 
 
 @admin.delete('/package/{packageId}')
 async def delete_package(packageId: str):
-    await del_plant(packageId)
+    return await del_plant(packageId)
 
 
 @admin.post('/plant/add')
@@ -29,22 +29,22 @@ async def add_plant(
         plantFeature: str = Query(...),
         plantIconURL: str = Query(...)
 ):
-    await create_plant(plantName, plantFeature, plantIconURL)
+    return await create_plant(plantName, plantFeature, plantIconURL)
 
 
 @admin.delete('/plant/{plantId}')
 async def delete_plant(plantId: str):
-    await del_package(plantId)
+    return await del_package(plantId)
 
 
 @admin.get('/plant', response_model=List[dict])
 async def get_all_plants():
-    await all_plant()
+    return await all_plant()
 
 
 @admin.post('/weather/city_input')
 async def city_input(csvURL: str = Query(...)):
-    await bulk_create_city(csvURL)
+    return await bulk_create_city(csvURL)
 
 
 @admin.post('/disease/add')
@@ -53,4 +53,4 @@ async def add_disease(
         plantName: str = Query(...),
         advice: str = Query(...)
 ):
-    await create_disease(diseaseName, plantName, advice)
+    return await create_disease(diseaseName, plantName, advice)

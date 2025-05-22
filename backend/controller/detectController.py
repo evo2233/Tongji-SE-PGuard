@@ -12,4 +12,4 @@ async def detect(
         file: UploadFile,
         user: User = Depends(get_current_user)
 ):
-    await do_detect(plotId, file, user)
+    return await do_detect(plotId, file, user)

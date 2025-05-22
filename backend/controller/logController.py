@@ -8,4 +8,4 @@ log_api = APIRouter()
 
 @log_api.get('/summary')
 async def get_summary(user: User = Depends(get_current_user)):
-    await make_summarize(user)
+    return await make_summarize(user)
