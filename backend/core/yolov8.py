@@ -28,13 +28,29 @@ def detect(model_type: str, image_path: str):
     )
 
     stdout, stderr = process.communicate()
+    print(f"Subprocess stdout:\n{stdout}")
+    if stderr:
+        print(f"Subprocess stderr:\n{stderr}")
 
     detection_result = None
     for line in stdout.splitlines():
         if "类别" in line and "置信度" in line:  # 解析规则
-            parts = line.split(", ")
-            cls = parts[0].split(": ")[1]
-            conf = float(parts[1].split(": ")[1])
-            detection_result = {"disease": cls, "confidence": conf}
-            break  # 找到第一个匹配结果后立即退出循环
+            try:
+                parts = line.split(", ")
+                cls = parts[0].split(": ")[1]
+                conf = float(parts[1].split(": ")[1])
+                detection_result = {"disease": cls, "confidence": conf}
+                break  # 找到第一个匹配结果后立即退出循环
+            except (IndexError, ValueError) as e:
+                print(f"Error parsing line '{line}': {e}")
+                # 如果解析失败，可以继续尝试下一行，或者直接认为解析失败
+                continue  # 继续尝试下一行
+
+    if detection_result is None:
+        error_message = f"Detection failed or output format was unexpected. " \
+                        f"Subprocess command: {' '.join(command)}\n" \
+                        f"Subprocess stdout:\n{stdout}\n" \
+                        f"Subprocess stderr:\n{stderr}"
+        raise RuntimeError(error_message)  # 抛出更具体的错误
+
     return detection_result

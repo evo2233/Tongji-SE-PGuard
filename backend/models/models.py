@@ -30,6 +30,9 @@ class Plot(Model):
     plotName = fields.CharField(max_length=40)
     userId = fields.ForeignKeyField('models.User', related_name='plot')
     plantId = fields.ForeignKeyField('models.Plant', related_name='plot')
+    class Meta:
+        table = "plot"
+        indexes = (("userId_id", "plantId_id"),)
 
 
 class Log(Model):

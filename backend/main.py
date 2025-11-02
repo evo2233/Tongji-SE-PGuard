@@ -12,6 +12,7 @@ from controller.plotController import plot_api
 from controller.detectController import detect_api
 from controller.logController import log_api
 
+# swagger http://127.0.0.1:8000/docs
 app = FastAPI(
     title="PGuard API",
     description="PGuard 系统的 API 文档",
